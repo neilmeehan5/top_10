@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Top 10 Lists - {{ sport_name }}</h1>
+    
+    {% if lists %}
+        {% for list in lists %}
+            <div class="list-card">
+                <h2>{{ list.title }}</h2>
+                <ul>
+                    {% for item in list.items|sort(attribute='rank') %}
+                        <li>
+                            <strong>#{{ item.rank }}:</strong> 
+                            {{ item.name }}
+                            {% if item.description %}
+                                - {{ item.description }}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No lists found for {{ sport_name }}.</p>
+    {% endif %}
+    
+    <style>
+        .list-card {
+            border: 1px solid #ddd;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+{% endblock %}
