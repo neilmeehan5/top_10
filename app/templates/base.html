@@ -1,0 +1,77 @@
+<html>
+    <head>
+        <title>Top 10 Lists</title>
+        <style>
+            .nav-tabs {
+                background-color: #f8f9fa;
+                padding: 10px 0;
+                border-bottom: 1px solid #dee2e6;
+            }
+            
+            .dropdown {
+                position: relative;
+                display: inline-block;
+                margin: 0 15px;
+            }
+            
+            .dropdown-content {
+                display: none;
+                position: absolute;
+                background-color: #fff;
+                min-width: 160px;
+                box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+                z-index: 1;
+            }
+            
+            .dropdown:hover .dropdown-content {
+                display: block;
+            }
+            
+            .dropdown-content a {
+                color: black;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+            }
+            
+            .dropdown-content a:hover {
+                background-color: #f1f1f1;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="nav-tabs">
+            <div class="dropdown">
+                <span>Sports</span>
+                <div class="dropdown-content">
+                    <a href="#">All</a>
+                    <a href="#">Football</a>
+                    <a href="#">Basketball</a>
+                    <a href="#">Baseball</a>
+                    <a href="#">Soccer</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <span>Universities</span>
+                <div class="dropdown-content">
+                    <a href="#">All</a>
+                    <a href="#">Public</a>
+                    <a href="#">Private</a>
+                    <a href="#">International</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <span>Entertainment</span>
+                <div class="dropdown-content">
+                    <a href="#">All</a>
+                    <a href="#">Movies</a>
+                    <a href="#">TV Shows</a>
+                    <a href="#">Music</a>
+                    <a href="#">Video Games</a>
+                </div>
+            </div>
+        </div>
+        {% block content %}
+        {% endblock %}
+    </body>
+</html>
