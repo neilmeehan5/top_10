@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import pytz
 
 db = SQLAlchemy()
 
@@ -13,7 +14,7 @@ class TopList(db.Model):
     title = db.Column(db.String(100), nullable=False)
     total_votes = db.Column(db.Integer, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
-    date_created = db.Column(db.DateTime, default=datetime.now(datetime.timezone.utc))
+    date_created = db.Column(db.DateTime, default=datetime.now(pytz.timezone('US/Eastern')))
     items = db.relationship('ListItem', backref='top_list', lazy=True)
 
 class ListItem(db.Model):

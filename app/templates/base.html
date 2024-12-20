@@ -37,6 +37,18 @@
             .dropdown-content a:hover {
                 background-color: #f1f1f1;
             }
+            
+            .create-list-btn {
+                background-color: #4CAF50;
+                color: white;
+                padding: 10px 20px;
+                text-decoration: none;
+                border-radius: 4px;
+                margin-left: 15px;
+            }
+            .create-list-btn:hover {
+                background-color: #45a049;
+            }
         </style>
     </head>
     <body>
@@ -69,6 +81,9 @@
                     <a href="#">Music</a>
                     <a href="#">Video Games</a>
                 </div>
+            </div>
+            <div class="dropdown">
+                <a href="{{ url_for('create_list') }}" class="create-list-btn">Create New List</a>
             </div>
         </div>
         {% block content %}

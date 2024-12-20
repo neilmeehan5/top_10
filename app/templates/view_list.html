@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ list.title }}</h1>
+    <p>Category: {{ list.category.name }}</p>
+    
+    <div class="list-items">
+        {% for item in items %}
+        <div class="list-item">
+            <h2>#{{ item.rank }} - {{ item.name }}</h2>
+            {% if item.description %}
+            <p>{{ item.description }}</p>
+            {% endif %}
+            <div class="stats">
+                <span>Total Votes: {{ item.total_votes }}</span>
+                <span>Total Points: {{ item.total_points }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .list-items {
+        margin-top: 20px;
+    }
+    .list-item {
+        padding: 15px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    .stats {
+        margin-top: 10px;
+        color: #666;
+    }
+    .stats span {
+        margin-right: 20px;
+    }
+</style>
+{% endblock %} 
