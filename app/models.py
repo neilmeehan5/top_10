@@ -12,6 +12,7 @@ class Category(db.Model):
 class TopList(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
+    subcategory = db.Column(db.String(50))
     total_votes = db.Column(db.Integer, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.now(pytz.timezone('US/Eastern')))

@@ -1,92 +1,204 @@
+<!DOCTYPE html>
 <html>
     <head>
         <title>Top 10 Lists</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
         <style>
-            .nav-tabs {
+            body {
+                margin: 0;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 background-color: #f8f9fa;
-                padding: 10px 0;
+                color: #212529;
+            }
+
+            .header {
+                background: linear-gradient(135deg, #1e3c72, #2a5298);
+                color: white;
+                padding: 1rem 2rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .nav-tabs {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                padding: 0.5rem 2rem;
+                background-color: white;
                 border-bottom: 1px solid #dee2e6;
             }
-            
+
             .dropdown {
                 position: relative;
                 display: inline-block;
-                margin: 0 15px;
             }
-            
+
+            .dropdown span {
+                padding: 0.5rem 1rem;
+                cursor: pointer;
+                border-radius: 4px;
+                transition: background-color 0.2s;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .dropdown span:hover {
+                background-color: #f8f9fa;
+            }
+
+            .dropdown span::after {
+                content: '\f107';
+                font-family: 'Font Awesome 6 Free';
+                font-weight: 900;
+            }
+
             .dropdown-content {
                 display: none;
                 position: absolute;
-                background-color: #fff;
+                background-color: white;
                 min-width: 160px;
-                box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                border-radius: 4px;
                 z-index: 1;
+                animation: fadeIn 0.2s ease-in-out;
             }
-            
+
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
             .dropdown:hover .dropdown-content {
                 display: block;
             }
-            
+
             .dropdown-content a {
-                color: black;
-                padding: 12px 16px;
+                color: #212529;
+                padding: 0.75rem 1rem;
                 text-decoration: none;
                 display: block;
+                transition: background-color 0.2s;
             }
-            
+
             .dropdown-content a:hover {
-                background-color: #f1f1f1;
+                background-color: #f8f9fa;
+                color: #0d6efd;
             }
-            
+
             .create-list-btn {
-                background-color: #4CAF50;
+                margin-left: auto;
+                background-color: #0d6efd;
                 color: white;
-                padding: 10px 20px;
-                text-decoration: none;
+                padding: 0.5rem 1rem;
                 border-radius: 4px;
-                margin-left: 15px;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                transition: background-color 0.2s;
             }
+
             .create-list-btn:hover {
-                background-color: #45a049;
+                background-color: #0b5ed7;
+            }
+
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 2rem;
+            }
+
+            .card {
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+                transition: transform 0.2s;
+            }
+
+            .card:hover {
+                transform: translateY(-2px);
             }
         </style>
     </head>
     <body>
+        <div class="header">
+            <h1>Top 10 Lists</h1>
+        </div>
+        
         <div class="nav-tabs">
             <div class="dropdown">
-                <span>Sports</span>
+                <span><i class="fas fa-trophy"></i> Sports</span>
                 <div class="dropdown-content">
-                    <a href="#">All</a>
-                    <a href="#">Football</a>
-                    <a href="#">Basketball</a>
-                    <a href="#">Baseball</a>
-                    <a href="#">Soccer</a>
+                    <a href="{{ url_for('category_view', category_name='Sports') }}">
+                        <i class="fas fa-list"></i> All
+                    </a>
+                    <a href="{{ url_for('category_view', category_name='Sports', subcategory='Football') }}">
+                        <i class="fas fa-football-ball"></i> Football
+                    </a>
+                    <a href="{{ url_for('category_view', category_name='Sports', subcategory='Basketball') }}">
+                        <i class="fas fa-basketball-ball"></i> Basketball
+                    </a>
+                    <a href="{{ url_for('category_view', category_name='Sports', subcategory='Baseball') }}">
+                        <i class="fas fa-baseball-ball"></i> Baseball
+                    </a>
+                    <a href="{{ url_for('category_view', category_name='Sports', subcategory='Soccer') }}">
+                        <i class="fas fa-futbol"></i> Soccer
+                    </a>
                 </div>
             </div>
+            
             <div class="dropdown">
-                <span>Universities</span>
+                <span><i class="fas fa-graduation-cap"></i> Universities</span>
                 <div class="dropdown-content">
-                    <a href="#">All</a>
-                    <a href="#">Public</a>
-                    <a href="#">Private</a>
-                    <a href="#">International</a>
+                    <a href="{{ url_for('category_view', category_name='Universities') }}">
+                        <i class="fas fa-list"></i> All
+                    </a>
+                    <a href="{{ url_for('category_view', category_name='Universities', subcategory='Public') }}">
+                        <i class="fas fa-university"></i> Public
+                    </a>
+                    <a href="{{ url_for('category_view', category_name='Universities', subcategory='Private') }}">
+                        <i class="fas fa-university"></i> Private
+                    </a>
+                    <a href="{{ url_for('category_view', category_name='Universities', subcategory='International') }}">
+                        <i class="fas fa-globe"></i> International
+                    </a>
                 </div>
             </div>
+            
             <div class="dropdown">
-                <span>Entertainment</span>
+                <span><i class="fas fa-film"></i> Entertainment</span>
                 <div class="dropdown-content">
-                    <a href="#">All</a>
-                    <a href="#">Movies</a>
-                    <a href="#">TV Shows</a>
-                    <a href="#">Music</a>
-                    <a href="#">Video Games</a>
+                    <a href="{{ url_for('category_view', category_name='Entertainment') }}">
+                        <i class="fas fa-list"></i> All
+                    </a>
+                    <a href="{{ url_for('category_view', category_name='Entertainment', subcategory='Movies') }}">
+                        <i class="fas fa-film"></i> Movies
+                    </a>
+                    <a href="{{ url_for('category_view', category_name='Entertainment', subcategory='TV Shows') }}">
+                        <i class="fas fa-tv"></i> TV Shows
+                    </a>
+                    <a href="{{ url_for('category_view', category_name='Entertainment', subcategory='Music') }}">
+                        <i class="fas fa-music"></i> Music
+                    </a>
+                    <a href="{{ url_for('category_view', category_name='Entertainment', subcategory='Video Games') }}">
+                        <i class="fas fa-gamepad"></i> Video Games
+                    </a>
                 </div>
             </div>
-            <div class="dropdown">
-                <a href="{{ url_for('create_list') }}" class="create-list-btn">Create New List</a>
-            </div>
+
+            {% if category_name %}
+                <a href="{{ url_for('create_list', category=category_name, subcategory=subcategory) }}" class="create-list-btn">
+                    <i class="fas fa-plus"></i> Create New List
+                </a>
+            {% else %}
+                <a href="{{ url_for('create_list') }}" class="create-list-btn">
+                    <i class="fas fa-plus"></i> Create New List
+                </a>
+            {% endif %}
         </div>
-        {% block content %}
-        {% endblock %}
+
+        {% block content %}{% endblock %}
     </body>
 </html>

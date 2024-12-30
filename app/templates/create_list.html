@@ -1,64 +1,382 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-    <h1>Create New Top 10 List</h1>
-    <form method="POST" action="{{ url_for('create_list') }}">
-        <div class="form-group">
-            <label for="title">List Title:</label>
-            <input type="text" id="title" name="title" required>
+<div class="page-container">
+    {% if is_new_version %}
+    <div class="side-panel">
+        <div class="panel-header">
+            <i class="fas fa-history"></i>
+            <h2>Previously Ranked Items</h2>
         </div>
-        
-        <div class="form-group">
-            <label for="category">Category:</label>
-            <select id="category" name="category_id" required>
-                {% for category in categories %}
-                    <option value="{{ category.id }}" data-name="{{ category.name|lower }}">{{ category.name }}</option>
-                {% endfor %}
-            </select>
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="itemSearch" placeholder="Search items..." onkeyup="filterItems()">
         </div>
-
-        <h2>Add Top 10 Items</h2>
-        {% for i in range(1, 11) %}
-        <div class="list-item">
-            <h3>#{{ i }}</h3>
-            <input type="text" name="item_name_{{ i }}" placeholder="Name" required>
+        <div class="existing-items">
+            {% for item in all_existing_items %}
+            <div class="existing-item" onclick="insertItem('{{ item.name|e }}')">
+                <div class="item-content">
+                    <span class="item-name">{{ item.name }}</span>
+                    <div class="item-stats">
+                        <span><i class="fas fa-star"></i> {{ item.total_points }} points</span>
+                        <span><i class="fas fa-list-ol"></i> {{ item.appearance_count }} lists</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-
-        <button type="submit">Create List</button>
     </div>
+    {% endif %}
 
-    <style>
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+    <div class="main-form">
+        <div class="form-header">
+            <h1>
+                {% if is_new_version %}
+                    <i class="fas fa-code-branch"></i> Create New Version of {{ original_list.title }}
+                {% else %}
+                    <i class="fas fa-plus-circle"></i> Create New List
+                {% endif %}
+            </h1>
+        </div>
+
+        <form method="POST" action="{{ url_for('create_list') }}" class="create-list-form">
+            {% if is_new_version %}
+                <input type="hidden" name="is_new_version" value="true">
+                <input type="hidden" name="original_list_id" value="{{ original_list.id }}">
+            {% endif %}
+
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="title">
+                        <i class="fas fa-heading"></i> List Title:
+                    </label>
+                    <input type="text" id="title" name="title" 
+                           {% if is_new_version %}value="{{ original_list.title }}" readonly{% endif %}
+                           required 
+                           class="{% if is_new_version %}readonly-field{% endif %}">
+                </div>
+
+                <div class="form-group">
+                    <label for="category">
+                        <i class="fas fa-folder"></i> Category:
+                    </label>
+                    <select id="category" name="category_id" required 
+                            {% if is_new_version %}disabled{% endif %}
+                            class="{% if is_new_version %}readonly-field{% endif %}"
+                            onchange="updateSubcategories()">
+                        {% for category in categories %}
+                            <option value="{{ category.id }}"
+                                {% if pre_selected_category and category.id == pre_selected_category.id %}selected{% endif %}
+                                {% if is_new_version and category.id == original_list.category_id %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="subcategory">
+                        <i class="fas fa-tag"></i> Subcategory:
+                    </label>
+                    <select id="subcategory" name="subcategory" required
+                            {% if is_new_version %}disabled{% endif %}
+                            class="{% if is_new_version %}readonly-field{% endif %}">
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2><i class="fas fa-list-ol"></i> Add Top 10 Items</h2>
+                <div class="items-grid">
+                    {% for i in range(1, 11) %}
+                    <div class="list-item">
+                        <div class="rank-badge">#{{ i }}</div>
+                        <div class="item-inputs">
+                            <input type="text" 
+                                   name="item_name_{{ i }}" 
+                                   placeholder="Name" 
+                                   required
+                                   {% if is_new_version and original_items %}
+                                   value="{{ original_items[i-1].name }}"
+                                   {% endif %}>
+                            <textarea name="item_description_{{ i }}" 
+                                      placeholder="Description (optional)"
+                                      rows="2">{% if is_new_version and original_items %}{{ original_items[i-1].description }}{% endif %}</textarea>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-save"></i> 
+                    {% if is_new_version %}
+                        Save New Version
+                    {% else %}
+                        Create List
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .page-container {
+        display: flex;
+        gap: 2rem;
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .side-panel {
+        width: 300px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        height: calc(100vh - 100px);
+        position: sticky;
+        top: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .panel-header {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        color: white;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .panel-header h2 {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
+    .search-box {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        position: relative;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #666;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 0.5rem 1rem 0.5rem 2.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .existing-items {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+
+    .existing-item {
+        padding: 0.75rem;
+        border: 1px solid #eee;
+        margin-bottom: 0.5rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .existing-item:hover {
+        background: #f8f9fa;
+        border-color: #0d6efd;
+    }
+
+    .item-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .item-name {
+        font-weight: 500;
+    }
+
+    .item-stats {
+        font-size: 0.8rem;
+        color: #666;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .main-form {
+        flex: 1;
+        max-width: 800px;
+    }
+
+    .form-header {
+        margin-bottom: 2rem;
+    }
+
+    .form-header h1 {
+        color: #2a5298;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #495057;
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .readonly-field {
+        background-color: #f8f9fa;
+        cursor: not-allowed;
+    }
+
+    .items-grid {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .list-item {
+        display: flex;
+        gap: 1rem;
+        align-items: start;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .rank-badge {
+        background: #1e3c72;
+        color: white;
+        width: 2.5rem;
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-weight: bold;
+    }
+
+    .item-inputs {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .submit-btn {
+        background: #0d6efd;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background-color 0.2s;
+    }
+
+    .submit-btn:hover {
+        background: #0b5ed7;
+    }
+</style>
+
+<script>
+    const subcategories = {
+        'Sports': ['Football', 'Basketball', 'Baseball', 'Soccer'],
+        'Universities': ['Public', 'Private', 'International'],
+        'Entertainment': ['Movies', 'TV Shows', 'Music', 'Video Games']
+    };
+
+    function updateSubcategories() {
+        const category = document.getElementById('category');
+        const subcategory = document.getElementById('subcategory');
+        const categoryName = category.options[category.selectedIndex].text;
+        const preSelectedSubcategory = '{{ pre_selected_subcategory }}';
+        
+        subcategory.innerHTML = '';
+        
+        if (subcategories[categoryName]) {
+            subcategories[categoryName].forEach(sub => {
+                const option = document.createElement('option');
+                option.value = sub;
+                option.text = sub;
+                if (sub === preSelectedSubcategory) {
+                    option.selected = true;
+                }
+                subcategory.appendChild(option);
+            });
         }
-        .form-group {
-            margin-bottom: 20px;
+    }
+
+    function filterItems() {
+        const searchText = document.getElementById('itemSearch').value.toLowerCase();
+        const items = document.querySelectorAll('.existing-item');
+        
+        items.forEach(item => {
+            const name = item.querySelector('.item-name').textContent.toLowerCase();
+            item.style.display = name.includes(searchText) ? '' : 'none';
+        });
+    }
+
+    function insertItem(name) {
+        let targetInput = document.activeElement;
+        if (!targetInput.name || !targetInput.name.startsWith('item_name_')) {
+            const emptyInputs = Array.from(document.querySelectorAll('input[name^="item_name_"]'))
+                .find(input => !input.value);
+            if (emptyInputs) targetInput = emptyInputs;
         }
-        .list-item {
-            margin-bottom: 15px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        
+        if (targetInput && targetInput.name && targetInput.name.startsWith('item_name_')) {
+            targetInput.value = name;
+            const nextInput = document.querySelector(`input[name="item_name_${parseInt(targetInput.name.split('_')[2]) + 1}"]`);
+            if (nextInput) nextInput.focus();
         }
-        input[type="text"], textarea, select {
-            width: 100%;
-            padding: 8px;
-            margin: 5px 0;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
+    }
+
+    document.addEventListener('DOMContentLoaded', updateSubcategories);
+</script>
 {% endblock %} 

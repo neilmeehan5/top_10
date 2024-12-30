@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="category-header">
+        <h1>
+            {% if subcategory %}
+                <i class="fas fa-folder-open"></i> {{ subcategory }} Lists in {{ category_name }}
+            {% else %}
+                <i class="fas fa-folder"></i> All {{ category_name }} Lists
+            {% endif %}
+        </h1>
+    </div>
+
+    {% if lists %}
+        <div class="lists-grid">
+            {% for list in lists %}
+            <div class="list-card">
+                <div class="list-card-header">
+                    <h2><i class="fas fa-list-ol"></i> {{ list.title }}</h2>
+                    <span class="list-meta">
+                        <i class="fas fa-calendar-alt"></i> {{ list.date_created.strftime('%B %d, %Y') }}
+                    </span>
+                </div>
+                <div class="list-preview">
+                    {% for item in list.items|sort(attribute='rank')|slice(5) %}
+                        <div class="preview-item">
+                            <span class="rank">#{{ item.rank }}</span>
+                            <span class="name">{{ item.name }}</span>
+                            {% if item.description %}
+                                <span class="description">{{ item.description }}</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="list-card-footer">
+                    <a href="{{ url_for('view_list', list_id=list.id) }}" class="view-btn">
+                        <i class="fas fa-eye"></i> View Full List
+                    </a>
+                    <a href="{{ url_for('create_version', original_list_id=list.id) }}" class="version-btn">
+                        <i class="fas fa-code-branch"></i> Create New Version
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-clipboard-list fa-4x"></i>
+            <p>
+                {% if subcategory %}
+                    No lists found for {{ subcategory }} in {{ category_name }}.
+                {% else %}
+                    No lists found in {{ category_name }}.
+                {% endif %}
+            </p>
+            <a href="{{ url_for('create_list', category=category_name, subcategory=subcategory) }}" class="create-list-btn">
+                <i class="fas fa-plus"></i> Create the First List!
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .category-header {
+        margin-bottom: 2rem;
+    }
+
+    .category-header h1 {
+        color: #2a5298;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .lists-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .list-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .list-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .list-card-header {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        color: white;
+    }
+
+    .list-card-header h2 {
+        margin: 0;
+        font-size: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .list-meta {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        display: block;
+        margin-top: 0.5rem;
+    }
+
+    .list-preview {
+        padding: 1rem;
+    }
+
+    .preview-item {
+        padding: 0.75rem;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .preview-item:last-child {
+        border-bottom: none;
+    }
+
+    .rank {
+        font-weight: bold;
+        color: #1e3c72;
+        min-width: 2.5rem;
+    }
+
+    .name {
+        flex: 1;
+    }
+
+    .description {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .list-card-footer {
+        padding: 1rem;
+        background: #f8f9fa;
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+
+    .view-btn, .version-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background-color 0.2s;
+    }
+
+    .view-btn {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    .view-btn:hover {
+        background-color: #0b5ed7;
+    }
+
+    .version-btn {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .version-btn:hover {
+        background-color: #5c636a;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .empty-state i {
+        color: #1e3c72;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: #666;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %} 
