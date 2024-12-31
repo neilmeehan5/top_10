@@ -2,57 +2,173 @@
 
 {% block content %}
 <div class="container">
-    <h1>{{ list.title }}</h1>
-    <p>Category: {{ list.category.name }} - {{ list.subcategory }}</p>
-    
-    <a href="{{ url_for('create_version', original_list_id=list.id) }}" class="create-version-btn">
-        Create New Version
-    </a>
-
-    <div class="view-toggle">
-        <a href="{{ url_for('view_list', list_id=list.id) }}" 
-           class="{% if not show_aggregate %}active{% endif %}">Current Version</a>
-        <a href="{{ url_for('view_list', list_id=list.id, show_aggregate=1) }}" 
-           class="{% if show_aggregate %}active{% endif %}">Aggregated Rankings</a>
-    </div>
-    
-    <div class="list-items">
-        {% for item in items %}
-        <div class="list-item">
-            <h2>#{{ item.rank }} - {{ item.name }}</h2>
-            {% if item.description %}
-            <p>{{ item.description }}</p>
-            {% endif %}
-            <div class="stats">
-                <span>Total Votes: {{ item.total_votes }}</span>
-                <span>Total Points: {{ item.total_points }}</span>
+    <div class="list-header">
+        <div class="title-section">
+            <h1><i class="fas fa-list-ol"></i> {{ list.title }}</h1>
+            <div class="list-meta">
+                <span><i class="fas fa-folder"></i> {{ list.category.name }}</span>
+                {% if list.subcategory %}
+                    <span><i class="fas fa-tag"></i> {{ list.subcategory }}</span>
+                {% endif %}
+                <span><i class="fas fa-users"></i> {{ list.contribution_count }} contributions</span>
             </div>
         </div>
-        {% endfor %}
+        <a href="{{ url_for('main.create_list', original_list_id=list.id) }}" class="contribute-btn">
+            <i class="fas fa-plus-circle"></i> Add Your Rankings
+        </a>
+    </div>
+
+    <div class="rankings-card">
+        <div class="card-header">
+            <h2><i class="fas fa-chart-bar"></i> Current Rankings</h2>
+            <div class="legend">
+                <span><i class="fas fa-star"></i> Total Points</span>
+                <span><i class="fas fa-users"></i> Times Ranked</span>
+                <span><i class="fas fa-calculator"></i> Avg. Points</span>
+            </div>
+        </div>
+        
+        <div class="rankings-list">
+            {% for item in items %}
+            <div class="ranking-item">
+                <div class="rank-badge">#{{ item.rank }}</div>
+                <div class="item-details">
+                    <h3>{{ item.name }}</h3>
+                    <div class="item-stats">
+                        <span class="stat">
+                            <i class="fas fa-star"></i> {{ item.total_points }}
+                        </span>
+                        <span class="stat">
+                            <i class="fas fa-users"></i> {{ item.total_votes }}
+                        </span>
+                        <span class="stat">
+                            <i class="fas fa-calculator"></i> {{ "%.2f"|format(item.total_points / item.total_votes) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
 
 <style>
-    .container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
+    .list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
     }
-    .list-items {
-        margin-top: 20px;
+
+    .title-section h1 {
+        margin: 0;
+        color: #2a5298;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
-    .list-item {
-        padding: 15px;
-        margin-bottom: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-    }
-    .stats {
-        margin-top: 10px;
+
+    .list-meta {
+        margin-top: 0.5rem;
+        display: flex;
+        gap: 1rem;
         color: #666;
     }
-    .stats span {
-        margin-right: 20px;
+
+    .contribute-btn {
+        background: #0d6efd;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background-color 0.2s;
+    }
+
+    .contribute-btn:hover {
+        background: #0b5ed7;
+    }
+
+    .rankings-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header h2 {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .legend {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .rankings-list {
+        padding: 1rem;
+    }
+
+    .ranking-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        align-items: center;
+    }
+
+    .ranking-item:last-child {
+        border-bottom: none;
+    }
+
+    .rank-badge {
+        background: #1e3c72;
+        color: white;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+
+    .item-details {
+        flex: 1;
+    }
+
+    .item-details h3 {
+        margin: 0;
+        color: #2a5298;
+    }
+
+    .item-stats {
+        margin-top: 0.5rem;
+        display: flex;
+        gap: 1.5rem;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .stat {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
     }
 </style>
 {% endblock %} 

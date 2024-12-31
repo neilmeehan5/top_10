@@ -4,65 +4,73 @@
 <div class="container">
     <div class="category-header">
         <h1>
+            <i class="fas fa-folder"></i> {{ category_name }}
             {% if subcategory %}
-                <i class="fas fa-folder-open"></i> {{ subcategory }} Lists in {{ category_name }}
-            {% else %}
-                <i class="fas fa-folder"></i> All {{ category_name }} Lists
+                <span class="subcategory">
+                    <i class="fas fa-angle-right"></i>
+                    <i class="fas fa-tag"></i> {{ subcategory }}
+                </span>
             {% endif %}
         </h1>
+        <a href="{{ url_for('main.create_list', category=category_name, subcategory=subcategory) }}" class="create-btn">
+            <i class="fas fa-plus-circle"></i> Create New List
+        </a>
     </div>
 
-    {% if lists %}
-        <div class="lists-grid">
-            {% for list in lists %}
-            <div class="list-card">
-                <div class="list-card-header">
-                    <h2><i class="fas fa-list-ol"></i> {{ list.title }}</h2>
-                    <span class="list-meta">
-                        <i class="fas fa-calendar-alt"></i> {{ list.date_created.strftime('%B %d, %Y') }}
-                    </span>
-                </div>
-                <div class="list-preview">
-                    {% for item in list.items|sort(attribute='rank')|slice(5) %}
-                        <div class="preview-item">
-                            <span class="rank">#{{ item.rank }}</span>
-                            <span class="name">{{ item.name }}</span>
-                            {% if item.description %}
-                                <span class="description">{{ item.description }}</span>
-                            {% endif %}
+    <div class="lists-grid">
+        {% if category_lists %}
+            {% for list_data in category_lists %}
+                <div class="list-card">
+                    <div class="list-header">
+                        <h2>{{ list_data.list.title }}</h2>
+                        <div class="list-meta">
+                            <span><i class="fas fa-users"></i> {{ list_data.list.contribution_count }} contributions</span>
+                            <span><i class="fas fa-calendar"></i> {{ list_data.list.date_created.strftime('%B %d, %Y') }}</span>
                         </div>
-                    {% endfor %}
+                    </div>
+
+                    <div class="rankings-preview">
+                        {% for item in list_data.rankings %}
+                        <div class="ranking-item">
+                            <div class="rank-badge">#{{ item.rank }}</div>
+                            <div class="item-details">
+                                <span class="item-name">{{ item.name }}</span>
+                                <div class="item-stats">
+                                    <span><i class="fas fa-star"></i> {{ item.total_points }}</span>
+                                    <span><i class="fas fa-users"></i> {{ item.total_votes }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="list-actions">
+                        <a href="{{ url_for('main.view_list', list_id=list_data.list.id) }}" class="view-btn">
+                            <i class="fas fa-eye"></i> View Full List
+                        </a>
+                        <a href="{{ url_for('main.create_list', original_list_id=list_data.list.id) }}" class="contribute-btn">
+                            <i class="fas fa-plus-circle"></i> Add Your Rankings
+                        </a>
+                    </div>
                 </div>
-                <div class="list-card-footer">
-                    <a href="{{ url_for('view_list', list_id=list.id) }}" class="view-btn">
-                        <i class="fas fa-eye"></i> View Full List
-                    </a>
-                    <a href="{{ url_for('create_version', original_list_id=list.id) }}" class="version-btn">
-                        <i class="fas fa-code-branch"></i> Create New Version
-                    </a>
-                </div>
-            </div>
             {% endfor %}
-        </div>
-    {% else %}
-        <div class="empty-state">
-            <i class="fas fa-clipboard-list fa-4x"></i>
-            <p>
-                {% if subcategory %}
-                    No lists found for {{ subcategory }} in {{ category_name }}.
-                {% else %}
-                    No lists found in {{ category_name }}.
-                {% endif %}
-            </p>
-            <a href="{{ url_for('create_list', category=category_name, subcategory=subcategory) }}" class="create-list-btn">
-                <i class="fas fa-plus"></i> Create the First List!
-            </a>
-        </div>
-    {% endif %}
+        {% else %}
+            <p>No lists found in this category.</p>
+        {% endif %}
+    </div>
 </div>
 
 <style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
     .category-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 2rem;
     }
 
@@ -71,12 +79,31 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        margin: 0;
+    }
+
+    .subcategory {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #666;
+    }
+
+    .create-btn {
+        background: #0d6efd;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .lists-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 1.5rem;
+        gap: 2rem;
     }
 
     .list-card {
@@ -84,118 +111,104 @@
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         overflow: hidden;
-        transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .list-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    .list-card-header {
+    .list-header {
         padding: 1.5rem;
         background: linear-gradient(135deg, #1e3c72, #2a5298);
         color: white;
     }
 
-    .list-card-header h2 {
+    .list-header h2 {
         margin: 0;
         font-size: 1.25rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
     }
 
     .list-meta {
-        font-size: 0.9rem;
-        opacity: 0.8;
-        display: block;
         margin-top: 0.5rem;
+        display: flex;
+        gap: 1rem;
+        font-size: 0.875rem;
+        opacity: 0.9;
     }
 
-    .list-preview {
+    .rankings-preview {
         padding: 1rem;
     }
 
-    .preview-item {
-        padding: 0.75rem;
-        border-bottom: 1px solid #eee;
+    .ranking-item {
+        display: flex;
+        gap: 1rem;
+        padding: 0.5rem;
+        align-items: center;
+    }
+
+    .rank-badge {
+        background: #1e3c72;
+        color: white;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
         display: flex;
         align-items: center;
-        gap: 1rem;
-    }
-
-    .preview-item:last-child {
-        border-bottom: none;
-    }
-
-    .rank {
+        justify-content: center;
         font-weight: bold;
-        color: #1e3c72;
-        min-width: 2.5rem;
+        font-size: 0.875rem;
     }
 
-    .name {
+    .item-details {
         flex: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
-    .description {
-        color: #666;
-        font-size: 0.9rem;
+    .item-name {
+        font-weight: 500;
     }
 
-    .list-card-footer {
-        padding: 1rem;
-        background: #f8f9fa;
+    .item-stats {
         display: flex;
         gap: 1rem;
-        justify-content: flex-end;
+        font-size: 0.875rem;
+        color: #666;
     }
 
-    .view-btn, .version-btn {
-        padding: 0.5rem 1rem;
-        border-radius: 4px;
+    .list-actions {
+        padding: 1rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        border-top: 1px solid #eee;
+    }
+
+    .view-btn, .contribute-btn {
+        padding: 0.75rem;
+        border-radius: 8px;
         text-decoration: none;
         display: flex;
         align-items: center;
+        justify-content: center;
         gap: 0.5rem;
         transition: background-color 0.2s;
     }
 
     .view-btn {
-        background-color: #0d6efd;
+        background: #6c757d;
+        color: white;
+    }
+
+    .contribute-btn {
+        background: #0d6efd;
         color: white;
     }
 
     .view-btn:hover {
-        background-color: #0b5ed7;
+        background: #5c636a;
     }
 
-    .version-btn {
-        background-color: #6c757d;
-        color: white;
-    }
-
-    .version-btn:hover {
-        background-color: #5c636a;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .empty-state i {
-        color: #1e3c72;
-        margin-bottom: 1rem;
-    }
-
-    .empty-state p {
-        color: #666;
-        margin-bottom: 2rem;
+    .contribute-btn:hover {
+        background: #0b5ed7;
     }
 </style>
 {% endblock %} 
